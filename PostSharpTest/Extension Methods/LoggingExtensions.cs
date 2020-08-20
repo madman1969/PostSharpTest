@@ -39,7 +39,7 @@ namespace PostSharpTest.Extension_Methods
         /// </summary>
         static LoggingExtensions()
         {
-            LogLevels = new[] {"NONE", "INFO", "WARN", "DEBUG", "ERROR"};
+            LogLevels = new[] { "NONE", "INFO", "WARN", "DEBUG", "ERROR" };
             bool tmp;
 
             // Retrieve the 'Log Info Msg' config setting ...
@@ -119,7 +119,7 @@ namespace PostSharpTest.Extension_Methods
                 // Append details of the exception to the log file ...
                 using (var writer = new StreamWriter(FilePath, true))
                 {
-                    writer.WriteLine($"{DateTime.Now:dd-MM-yyyy HH:mm:sss.fff} - {LogLevels[(int) level]} - <{currentThreadID}> [{className}]\t{infoMessage}");
+                    writer.WriteLine($"{DateTime.Now:dd-MM-yyyy HH:mm:sss.fff} - {LogLevels[(int)level]} - <{currentThreadID}> [{className}]\t{infoMessage}");
                 }
 
                 // Out to console if required ...
