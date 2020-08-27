@@ -3,12 +3,12 @@ using System;
 
 namespace PostSharpTest
 {
-    [Boundary, ExceptionHandler]
+    [ExceptionHandler(AspectPriority = 1), Boundary(AspectPriority = 2)]
     public class MathCalculations
     {
         #region Fields and properties
 
-        private static readonly Random rnd = new Random();
+        private static readonly Random Rnd = new Random();
 
         #endregion
 
@@ -21,7 +21,7 @@ namespace PostSharpTest
         /// <returns></returns>
         public static int Square(int value)
         {
-            var tmp = rnd.Next(11);
+            var tmp = Rnd.Next(11);
 
             if (tmp == 5)
             {
@@ -40,7 +40,7 @@ namespace PostSharpTest
         /// <returns></returns>
         public static int Cube(int value)
         {
-            var tmp = rnd.Next(6);
+            var tmp = Rnd.Next(6);
 
             if (tmp == 5)
             {

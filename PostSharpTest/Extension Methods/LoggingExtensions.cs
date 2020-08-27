@@ -23,12 +23,11 @@ namespace PostSharpTest.Extension_Methods
         #region Private Fields
 
         private static readonly string FilePath;
-        private static object _logLock = new object();
-        private static object _dumpLock = new object();
+        private static readonly object LogLock = new object();
+        private static readonly object DumpLock = new object();
         private static readonly string[] LogLevels;
-        private static bool OverwriteLog;
-        private static string AppDir;
-        private static LogLevels levelSetting = Extension_Methods.LogLevels.None;
+        private static readonly string AppDir;
+        private static readonly LogLevels LevelSetting = Extension_Methods.LogLevels.None;
 
         #endregion
 
@@ -40,15 +39,15 @@ namespace PostSharpTest.Extension_Methods
         static LoggingExtensions()
         {
             LogLevels = new[] { "NONE", "INFO", "WARN", "DEBUG", "ERROR" };
-            bool tmp;
 
             // Retrieve the 'Log Info Msg' config setting ...
+            // ReSharper disable once StringLiteralTypo
             var setting = ConfigurationManager.AppSettings["LogInfoMsgs"] ?? "false";
-            bool.TryParse(setting, out tmp);
+            bool.TryParse(setting, out var tmp);
 
             if (tmp)
             {
-                levelSetting = Extension_Methods.LogLevels.Info;
+                LevelSetting = Extension_Methods.LogLevels.Info;
             }
 
             // Retrieve the 'Log Info Msg' config setting ...
@@ -57,20 +56,20 @@ namespace PostSharpTest.Extension_Methods
 
             if (tmp)
             {
-                levelSetting = Extension_Methods.LogLevels.Error;
+                LevelSetting = Extension_Methods.LogLevels.Error;
             }
 
             // Build path to log file ...
             var appPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             AppDir = Path.GetDirectoryName(appPath);
-            FilePath = Path.Combine(AppDir, InfoLog);
+            FilePath = Path.Combine(AppDir ?? string.Empty, InfoLog);
 
             // Retrieve 'overwrite log' setting ...
             setting = ConfigurationManager.AppSettings["OverwriteLogs"] ?? "false";
-            bool.TryParse(setting, out OverwriteLog);
+            bool.TryParse(setting, out var overwriteLog);
 
             // Should we overwrite existing log file ? ...
-            if (OverwriteLog)
+            if (overwriteLog)
             {
                 // Delete log file & swallow any errors ...
                 try
@@ -78,7 +77,8 @@ namespace PostSharpTest.Extension_Methods
                     if (File.Exists(FilePath))
                         File.Delete(FilePath);
                 }
-                catch (Exception ex)
+                // ReSharper disable once EmptyGeneralCatchClause
+                catch (Exception)
                 {
                 }
             }
@@ -99,27 +99,27 @@ namespace PostSharpTest.Extension_Methods
             bool toConsole = true)
         {
             // Bail if logging turned off ...
-            if (levelSetting == Extension_Methods.LogLevels.None)
+            if (LevelSetting == Extension_Methods.LogLevels.None)
                 return;
 
             // Bail if log request above the current logging level ...
-            if (level > levelSetting)
+            if (level > LevelSetting)
                 return;
 
             // Ensure is thread-safe ...
-            lock (_logLock)
+            lock (LogLock)
             {
                 // Get current thread ID 
-                var currentThreadID = Thread.CurrentThread.ManagedThreadId;
+                var currentThreadId = Thread.CurrentThread.ManagedThreadId;
 
                 // Establish class name of calling method ...
                 var method = new StackTrace().GetFrame(1).GetMethod();
-                var className = method.ReflectedType.Name;
+                var className = method.ReflectedType?.Name;
 
                 // Append details of the exception to the log file ...
                 using (var writer = new StreamWriter(FilePath, true))
                 {
-                    writer.WriteLine($"{DateTime.Now:dd-MM-yyyy HH:mm:sss.fff} - {LogLevels[(int)level]} - <{currentThreadID}> [{className}]\t{infoMessage}");
+                    writer.WriteLine($"{DateTime.Now:dd-MM-yyyy HH:mm:sss.fff} - {LogLevels[(int)level]} - <{currentThreadId}> [{className}]\t{infoMessage}");
                 }
 
                 // Out to console if required ...
@@ -139,7 +139,7 @@ namespace PostSharpTest.Extension_Methods
         public static void DumpFile(this string payload, string dumpFile)
         {
             // Bail if logging turned off ...
-            if (levelSetting == Extension_Methods.LogLevels.None)
+            if (LevelSetting == Extension_Methods.LogLevels.None)
                 return;
 
             if (string.IsNullOrEmpty(dumpFile))
@@ -152,11 +152,12 @@ namespace PostSharpTest.Extension_Methods
                 if (File.Exists(filePath))
                     File.Delete(filePath);
             }
+            // ReSharper disable once EmptyGeneralCatchClause
             catch
             {
             }
 
-            lock (_dumpLock)
+            lock (DumpLock)
             {
                 using (var writer = new StreamWriter(filePath, true))
                 {
@@ -170,6 +171,7 @@ namespace PostSharpTest.Extension_Methods
         /// </summary>
         /// <param name="payload"></param>
         /// <param name="xmlFile"></param>
+        // ReSharper disable once UnusedMember.Global
         public static void DumpAsXml(this string payload, string xmlFile)
         {
             if (string.IsNullOrEmpty(xmlFile))
@@ -190,6 +192,7 @@ namespace PostSharpTest.Extension_Methods
             formattedXml.DumpFile(xmlFile);
         }
 
+        // ReSharper disable once IdentifierTypo
         private static Color LevelToColour(LogLevels level)
         {
             Color result;
@@ -226,7 +229,7 @@ namespace PostSharpTest.Extension_Methods
     /// <summary>
     /// Enumeration listing the supported logging levels
     /// </summary>
-    public enum LogLevels : int
+    public enum LogLevels
     {
         /// <summary>
         /// No logging enabled

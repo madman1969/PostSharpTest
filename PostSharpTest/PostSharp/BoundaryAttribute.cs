@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using PostSharp.Aspects;
+﻿using PostSharp.Aspects;
 using PostSharpTest.Extension_Methods;
+using System;
+using System.Collections.Generic;
 
 namespace PostSharpTest.PostSharp
 {
@@ -16,7 +16,7 @@ namespace PostSharpTest.PostSharp
         /// <param name="args"></param>
         public override void OnEntry(MethodExecutionArgs args)
         {
-            $"Entering [{args.Method.DeclaringType.FullName}.{args.Method.Name}]: [{ParseArguments(args.Arguments)}]".LogMsg();
+            $"Entering [{args.Method.DeclaringType?.FullName}.{args.Method.Name}]: [{ParseArguments(args.Arguments)}]".LogMsg();
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace PostSharpTest.PostSharp
         /// <param name="args"></param>
         public override void OnExit(MethodExecutionArgs args)
         {
-            $"Exiting [{args.Method.DeclaringType.FullName}.{args.Method.Name}]".LogMsg();
+            $"Exiting [{args.Method.DeclaringType?.FullName}.{args.Method.Name}]".LogMsg();
         }
 
         #endregion

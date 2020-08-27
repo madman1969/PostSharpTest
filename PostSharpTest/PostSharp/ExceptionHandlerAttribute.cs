@@ -5,7 +5,7 @@ using System;
 namespace PostSharpTest.PostSharp
 {
     [Serializable]
-    public class ExceptionHandlerAttribute : OnMethodBoundaryAspect
+    public class ExceptionHandlerAttribute : OnExceptionAspect
     {
         /// <summary>
         /// Invoked when exception encountered in method
@@ -17,7 +17,7 @@ namespace PostSharpTest.PostSharp
             args.Exception.ToLogString().LogMsg(LogLevels.Error);
 
             // Swallow the exception ...
-            args.FlowBehavior = FlowBehavior.Continue; 
+            args.FlowBehavior = FlowBehavior.Continue;
         }
     }
 }
